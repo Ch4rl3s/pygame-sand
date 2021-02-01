@@ -1,6 +1,7 @@
 import pygame
 import sys
 import random
+import time as tm
 
 mainClock = pygame.time.Clock()
 
@@ -12,7 +13,10 @@ yellow = (255, 255, 0, 255)
 blue = (0,0,255,255)
 grey = (10,10,10,255)
 
+
 pygame.init()
+
+myfont = pygame.font.SysFont('timesnewroman',  12)
 
 pygame.display.set_caption('sand testing')
 screen = pygame.display.set_mode(screen_size)
@@ -22,10 +26,11 @@ mouse_down = False
 draw_water = False
 draw_stone = False
 draw_brick = False
+erase = False
 
-sand = pygame.Rect(300, 240, 1, 1)
+# sand = pygame.Rect(300, 240, 1, 1)
 
-sand_arr = [sand]
+sand_arr = []
 water_arr = []
 stone_arr=[]
 brick_arr = []
@@ -111,11 +116,14 @@ def stone_rule_set(stone):
 		pass
 	return stone
 
+
 while True:
 
 	screen.fill(white)
 
 	movement = [0, 1]
+
+	start = tm.time()
 
 	for tile in tiles:
 		pygame.draw.rect(screen, black, tile)
@@ -132,10 +140,22 @@ while True:
 		sand = custom_sand_collision(sand)
 		pygame.draw.rect(screen, yellow, sand)
 
+	rand_arr = [random.randint(0,1),random.randint(0,1),random.randint(0,1),random.randint(0,1),random.randint(0,1)]
+	i=0
+
 	for water in water_arr:
-		water = custom_water_collision(water, random.randint(0,1))
+		if i==len(rand_arr):
+			i=0
+		water = custom_water_collision(water, rand_arr[i])
+		i+=1
 		pygame.draw.rect(screen, blue, water)
 
+	end = tm.time()
+
+	text = myfont.render(f"{round((end - start), 5)}", False, (0, 0, 0))
+	text1 = myfont.render(f"entities {len(water_arr)+len(sand_arr)+len(stone_arr)+len(brick_arr)}", False, (0, 0, 0))
+	screen.blit(text, (500,10))
+	screen.blit(text1, (500,20))
 
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
