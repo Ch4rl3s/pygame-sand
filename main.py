@@ -1,5 +1,6 @@
 import pygame
 import sys
+import random
 
 mainClock = pygame.time.Clock()
 
@@ -81,18 +82,23 @@ def custom_sand_collision(sand):
 def custom_water_collision(water):
 	x = water.x
 	y = water.y
+	dir = random.randint(0,1)
 	if screen.get_at((x,y+1))==white:
 		water.y = y+1
-	elif screen.get_at((x-1,y))==white:
-		water.x-=1
 	elif screen.get_at((x-1,y+1))==white:
 		water.x -= 1
 		water.y +=1
+	elif screen.get_at((x-1,y))==white and dir==1:
+		water.x-=1
+	elif screen.get_at((x+1,y))==white and dir==0:
+		water.x+=1
 	elif screen.get_at((x+1,y+1))==white:
 		water.x+=1
 		water.y+=1
-	elif screen.get_at((x+1,y))==white:
+	elif screen.get_at((x+1,y))==white and dir==1:
 		water.x+=1
+	elif screen.get_at((x-1,y))==white and dir==0:
+		water.x-=1
 	else:
 		pass
 	return water
@@ -187,15 +193,7 @@ while True:
 	if draw_water:
 		x,y = pygame.mouse.get_pos()
 		water_arr.append(pygame.Rect(x, y, 1, 1))
-		water_arr.append(pygame.Rect(x-1, y+1, 1, 1))
 		water_arr.append(pygame.Rect(x+1, y, 1, 1))
-		water_arr.append(pygame.Rect(x-1, y, 1, 1))
-		water_arr.append(pygame.Rect(x, y+1, 1, 1))
-		water_arr.append(pygame.Rect(x, y-1, 1, 1))
-		water_arr.append(pygame.Rect(x+1, y-1, 1, 1))
-		water_arr.append(pygame.Rect(x+1, y+1, 1, 1))
-		water_arr.append(pygame.Rect(x-1, y-1, 1, 1))
-
 
 
 	if mouse_down:
