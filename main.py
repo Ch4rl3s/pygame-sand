@@ -79,10 +79,9 @@ def custom_sand_collision(sand):
 		pass
 	return sand
 
-def custom_water_collision(water):
+def custom_water_collision(water, dir):
 	x = water.x
 	y = water.y
-	dir = random.randint(0,1)
 	if screen.get_at((x,y+1))==white:
 		water.y = y+1
 	elif screen.get_at((x-1,y+1))==white:
@@ -134,7 +133,7 @@ while True:
 		pygame.draw.rect(screen, yellow, sand)
 
 	for water in water_arr:
-		water = custom_water_collision(water)
+		water = custom_water_collision(water, random.randint(0,1))
 		pygame.draw.rect(screen, blue, water)
 
 
