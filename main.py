@@ -72,8 +72,11 @@ def collision_test(rect, tiles):
 def custom_sand_collision(sand):
 	x = sand.x
 	y = sand.y
+	vel = 4
 	if screen.get_at((x,y+1))==white:
-		sand.y = y+1
+		for i in range(vel):
+			if screen.get_at((x,y+i))==white:
+				sand.y = y+i
 	elif screen.get_at((x-1,y+1))==white:
 		sand.y = y+1
 		sand.x -= 1
@@ -87,22 +90,31 @@ def custom_sand_collision(sand):
 def custom_water_collision(water, dir):
 	x = water.x
 	y = water.y
+	hor_spread = 2
 	if screen.get_at((x,y+1))==white:
 		water.y = y+1
 	elif screen.get_at((x-1,y+1))==white:
 		water.x -= 1
 		water.y +=1
 	elif screen.get_at((x-1,y))==white and dir==1:
-		water.x-=1
+		for i in range(hor_spread):
+			if screen.get_at((x-i,y))==white:
+				water.x-=1
 	elif screen.get_at((x+1,y))==white and dir==0:
-		water.x+=1
+		for i in range(hor_spread):
+			if screen.get_at((x+i,y))==white:
+				water.x+=1
 	elif screen.get_at((x+1,y+1))==white:
 		water.x+=1
 		water.y+=1
 	elif screen.get_at((x+1,y))==white and dir==1:
-		water.x+=1
+		for i in range(hor_spread):
+			if screen.get_at((x+i,y))==white:
+				water.x+=1
 	elif screen.get_at((x-1,y))==white and dir==0:
-		water.x-=1
+		for i in range(hor_spread):
+			if screen.get_at((x-i,y))==white:
+				water.x-=1
 	else:
 		pass
 	return water
@@ -210,9 +222,12 @@ while True:
 		brick_arr.append(pygame.Rect(x, y, 10, 10))
 
 	if draw_water:
+		h_water = 4
+		v_water = 4
 		x,y = pygame.mouse.get_pos()
-		water_arr.append(pygame.Rect(x, y, 1, 1))
-		water_arr.append(pygame.Rect(x+1, y, 1, 1))
+		for i in range(h_water):
+			for j in range(v_water):
+				water_arr.append(pygame.Rect(x+i, y+j, 1, 1))
 
 
 	if mouse_down:
