@@ -2,6 +2,7 @@ import pygame
 import sys
 import random
 import time as tm
+import phys as ph
 
 mainClock = pygame.time.Clock()
 
@@ -22,6 +23,8 @@ pygame.display.set_caption('sand testing')
 screen = pygame.display.set_mode(screen_size)
 screen.fill(white)
 
+data = [[],[]]
+
 mouse_down = False
 draw_water = False
 draw_stone = False
@@ -34,99 +37,8 @@ sand_arr = []
 water_arr = []
 stone_arr=[]
 brick_arr = []
-tiles = [pygame.Rect(0, 440, 600, 2),pygame.Rect(2, 0, 2, 480), pygame.Rect(597, 0, 2, 480)]
-	
-def collision_test(rect, tiles):
-	collisions = []
-	for tile in tiles:
-		if rect.colliderect(tile):
-			collisions.append(tile)
-	return collisions
+tiles = [pygame.Rect(0, 440, 600, 2),pygame.Rect(6, 0, 2, 480), pygame.Rect(594, 0, 2, 480)]
 
-
-# def move(rect, movement, tiles, sand):
-# 	rect.x += movement[0]
-# 	collisions = collision_test(rect, tiles)
-# 	for tile in collisions:
-# 		if movement[0] > 0:
-# 			rect.right = tile.left
-# 		if movement[0] < 0:
-# 			rect.left = tile.right
-
-# 	rect.y += movement[1]
-# 	collisions = collision_test(rect, tiles)
-# 	for tile in collisions:
-# 		if movement[1] > 0:
-# 			rect.bottom = tile.top
-# 		if movement[1] < 0:
-# 			rect.top = tile.bottom
-# 	collisions = collision_test(rect, sand)
-# 	for tile in collisions:
-# 		if rect.x!=tile.x and rect.y!=tile.y:
-# 			if movement[1] > 0:
-# 				rect.bottom = tile.top
-# 			if movement[1] < 0:
-# 				rect.top = tile.bottom
-# 	return rect
-
-def custom_sand_collision(sand):
-	x = sand.x
-	y = sand.y
-	vel = 4
-	if screen.get_at((x,y+1))==white:
-		for i in range(vel):
-			if screen.get_at((x,y+i))==white:
-				sand.y = y+i
-	elif screen.get_at((x-1,y+1))==white:
-		sand.y = y+1
-		sand.x -= 1
-	elif screen.get_at((x+1,y+1))==white:
-		sand.y+=1
-		sand.x+=1
-	elif screen.get_at((x,y+1))==black:
-		pass
-	return sand
-
-def custom_water_collision(water, dir):
-	x = water.x
-	y = water.y
-	hor_spread = 2
-	if screen.get_at((x,y+1))==white:
-		water.y = y+1
-	elif screen.get_at((x-1,y+1))==white:
-		water.x -= 1
-		water.y +=1
-	elif screen.get_at((x-1,y))==white and dir==1:
-		for i in range(hor_spread):
-			if screen.get_at((x-i,y))==white:
-				water.x-=1
-	elif screen.get_at((x+1,y))==white and dir==0:
-		for i in range(hor_spread):
-			if screen.get_at((x+i,y))==white:
-				water.x+=1
-	elif screen.get_at((x+1,y+1))==white:
-		water.x+=1
-		water.y+=1
-	elif screen.get_at((x+1,y))==white and dir==1:
-		for i in range(hor_spread):
-			if screen.get_at((x+i,y))==white:
-				water.x+=1
-	elif screen.get_at((x-1,y))==white and dir==0:
-		for i in range(hor_spread):
-			if screen.get_at((x-i,y))==white:
-				water.x-=1
-	else:
-		pass
-	return water
-
-def stone_rule_set(stone):
-	x = stone.x
-	y = stone.y
-	if screen.get_at((x,y+1))==white:
-		stone.y = y+1
-	else:
-		pass
-	return stone
 
 
 while True:
@@ -135,7 +47,6 @@ while True:
 
 	movement = [0, 1]
 
-	start = tm.time()
 
 	for tile in tiles:
 		pygame.draw.rect(screen, black, tile)
@@ -144,33 +55,32 @@ while True:
 		pygame.draw.rect(screen, black, brick)
 
 	for stone in stone_arr:
-		stone = stone_rule_set(stone)
+		stone = ph.stone_rule_set(stone, screen)
 		pygame.draw.rect(screen, grey, stone)
 
 	for sand in sand_arr:
 		# sand = move(sand, movement, tiles, sand_arr)
-		sand = custom_sand_collision(sand)
+		sand = ph.custom_sand_collision(sand, screen)
 		pygame.draw.rect(screen, yellow, sand)
+
 
 	rand_arr = [random.randint(0,1),random.randint(0,1),random.randint(0,1),random.randint(0,1),random.randint(0,1)]
 	i=0
+	start = tm.time()
 
 	for water in water_arr:
 		if i==len(rand_arr):
 			i=0
-		water = custom_water_collision(water, rand_arr[i])
+		water = ph.custom_water_collision(water, rand_arr[i], screen)
 		i+=1
 		pygame.draw.rect(screen, blue, water)
 
 	end = tm.time()
 
-	text = myfont.render(f"{round((end - start), 5)}", False, (0, 0, 0))
-	text1 = myfont.render(f"entities {len(water_arr)+len(sand_arr)+len(stone_arr)+len(brick_arr)}", False, (0, 0, 0))
-	screen.blit(text, (500,10))
-	screen.blit(text1, (500,20))
-
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
+			f = open('text.txt')
+			print(data)
 			pygame.quit()
 			sys.exit()
 
@@ -222,12 +132,13 @@ while True:
 		brick_arr.append(pygame.Rect(x, y, 10, 10))
 
 	if draw_water:
-		h_water = 4
-		v_water = 4
+		h_water = 20
+		v_water = 20
 		x,y = pygame.mouse.get_pos()
 		for i in range(h_water):
 			for j in range(v_water):
-				water_arr.append(pygame.Rect(x+i, y+j, 1, 1))
+				if screen.get_at((x+i,y+j))==white:
+					water_arr.append(pygame.Rect(x+i, y+j, 1, 1))
 
 
 	if mouse_down:
@@ -237,7 +148,14 @@ while True:
 		sand_arr.append(pygame.Rect(x+1, y, 1, 1))
 		sand_arr.append(pygame.Rect(x+1, y+1, 1, 1))
 
+
+
+	data[1].append(round((end - start), 5))
+	data[0].append(len(water_arr)+len(sand_arr)+len(stone_arr)+len(brick_arr))
+	text = myfont.render(f"{round((end - start), 5)}", False, (0, 0, 0))
+	text1 = myfont.render(f"entities {len(water_arr)+len(sand_arr)+len(stone_arr)+len(brick_arr)}", False, (0, 0, 0))
+	screen.blit(text, (500,10))
+	screen.blit(text1, (500,20))
+
 	pygame.display.update()
 	mainClock.tick(60)
-
-
